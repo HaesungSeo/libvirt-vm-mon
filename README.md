@@ -64,7 +64,10 @@ make
 
 ```bash
 # 기본 사용법
-./libvirt-vm-mon -user suser -host 192.168.6.66
+./libvirt-vm-mon -user myuser -host 192.168.1.100
+
+# 또는 make로 빌드한 경우
+./lvmon -user myuser -host 192.168.1.100
 
 # 호스트명으로 접속
 ./libvirt-vm-mon -user admin -host vm-host.example.com
@@ -73,18 +76,45 @@ make
 ./libvirt-vm-mon -h
 ```
 
-## 출력 예시
+### 실행 결과 예시
 
-```
-[vm1] state=running  vcpu=2  mem=2097152KiB  cputime=12345678ns
-  disk vda      rd=1048576B wr=524288B errs=0
-  disk vdb      rd=2097152B wr=1048576B errs=0
-  nic  vnet0    rx=1024B tx=2048B (rxPkts=10 txPkts=20)
+원격 서버에 `web-server`와 `database-server` 두 개의 VM이 실행 중인 경우:
+
+```bash
+$ ./lvmon -user myuser -host 192.168.1.100
+[web-server] state=running  vcpu=4  mem=4194304KiB  cputime=1763967430000000ns
+  disk vda      rd=323655595008B wr=230157305344B errs=0
+  nic  web-server-eth0 rx=12314334870B tx=845075268B (rxPkts=56676469 txPkts=3532344)
+  macs: 52:54:00:ab:cd:ef
+
+[database-server] state=running  vcpu=16  mem=25165824KiB  cputime=32130911240000000ns
+  disk vda      rd=131380239360B wr=10956509222912B errs=0
+  nic  database-server-eth0 rx=681668217242B tx=7611180865198B (rxPkts=3170865327 txPkts=3033473839)
   macs: 52:54:00:12:34:56
-
-[vm2] state=shutoff  vcpu=1  mem=1048576KiB  cputime=0ns
-  macs: 52:54:00:78:9a:bc
 ```
+
+#### 출력 정보 설명
+
+각 VM에 대해 다음 정보가 표시됩니다:
+
+- **VM 이름과 기본 상태**
+  - `state`: VM 실행 상태 (running, shutoff, paused 등)
+  - `vcpu`: 할당된 가상 CPU 개수
+  - `mem`: 할당된 메모리 (KiB 단위)
+  - `cputime`: 누적 CPU 사용 시간 (나노초 단위)
+
+- **디스크 통계** (`disk` 항목)
+  - `rd`: 읽은 바이트 수
+  - `wr`: 쓴 바이트 수
+  - `errs`: 디스크 오류 횟수
+
+- **네트워크 인터페이스 통계** (`nic` 항목)
+  - `rx`: 받은 바이트 수
+  - `tx`: 보낸 바이트 수
+  - `rxPkts`: 받은 패킷 수
+  - `txPkts`: 보낸 패킷 수
+
+- **MAC 주소**: VM의 네트워크 인터페이스 MAC 주소
 
 ## 요구사항
 
