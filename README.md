@@ -9,7 +9,35 @@ libvirt를 통해 원격 서버의 가상머신 상태와 리소스 사용량을
 - 각 VM의 CPU, 메모리, 디스크, 네트워크 사용량 통계 출력
 - MAC 주소 정보 표시
 
-## 빌드 방법
+## 설치 및 빌드
+
+### 1. 프로젝트 다운로드
+
+#### Git을 사용하여 클론:
+```bash
+git clone git@github.com:HaesungSeo/libvirt-vm-mon.git
+cd libvirt-vm-mon
+```
+
+#### 또는 소스 코드를 직접 다운로드한 경우:
+```bash
+# 압축 해제 후 디렉토리로 이동
+cd libvirt-vm-mon
+```
+
+### 2. 의존성 확인 및 설치
+
+Go 모듈이 이미 설정되어 있으므로 의존성은 자동으로 다운로드됩니다:
+
+```bash
+# 의존성 확인
+go mod tidy
+
+# 의존성 다운로드 (필요시)
+go mod download
+```
+
+### 3. 빌드 방법
 
 ```bash
 go build -o libvirt-vm-mon main.go
@@ -60,13 +88,78 @@ make
 
 ## 요구사항
 
+### 로컬 시스템 (빌드 및 실행 환경)
 - Go 1.18 이상
-- libvirt-go 패키지 (`github.com/libvirt/libvirt-go`)
-- 원격 서버에 SSH 키 기반 인증 설정
-- 원격 서버에 libvirt 설치 및 실행 중
+- Git (프로젝트 다운로드용)
+- libvirt 개발 라이브러리 (libvirt-dev 또는 libvirt-devel)
+
+#### Ubuntu/Debian에서 libvirt 개발 라이브러리 설치:
+```bash
+sudo apt-get update
+sudo apt-get install libvirt-dev pkg-config
+```
+
+#### CentOS/RHEL/Fedora에서 libvirt 개발 라이브러리 설치:
+```bash
+# CentOS/RHEL
+sudo yum install libvirt-devel pkgconfig
+
+# Fedora
+sudo dnf install libvirt-devel pkgconfig
+```
+
+### 원격 서버 (모니터링 대상)
+- libvirt 설치 및 실행 중
+- SSH 서버 실행 중
+- SSH 키 기반 인증 설정 (패스워드 없는 로그인)
+
+## Go 의존성
+- `github.com/libvirt/libvirt-go` v7.4.0+incompatible
 
 ## 주의사항
 
 - 이 프로그램은 읽기 전용 모드로 작동하므로 VM을 제어하거나 설정을 변경할 수 없습니다
 - SSH 키 기반 인증이 설정되어 있어야 합니다
 - 원격 서버의 libvirt 소켓 경로는 `/run/libvirt/libvirt-sock-ro` 또는 `/var/run/libvirt/libvirt-sock-ro`를 시도합니다
+
+## 문제 해결
+
+### 빌드 오류 해결
+
+#### "libvirt.h: No such file or directory" 오류
+```bash
+# Ubuntu/Debian
+sudo apt-get install libvirt-dev pkg-config
+
+# CentOS/RHEL/Fedora
+sudo yum install libvirt-devel pkgconfig  # 또는 dnf
+```
+
+#### "pkg-config not found" 오류
+```bash
+# Ubuntu/Debian
+sudo apt-get install pkg-config
+
+# CentOS/RHEL/Fedora  
+sudo yum install pkgconfig  # 또는 dnf
+```
+
+### 실행 시 오류 해결
+
+#### "접속 실패" 오류
+1. SSH 키 인증이 설정되어 있는지 확인:
+   ```bash
+   ssh user@host "echo 'SSH 연결 성공'"
+   ```
+2. 원격 서버에서 libvirt 서비스 상태 확인:
+   ```bash
+   ssh user@host "sudo systemctl status libvirtd"
+   ```
+
+#### "권한 거부" 오류
+원격 서버에서 사용자가 libvirt 그룹에 속해 있는지 확인:
+```bash
+ssh user@host "groups"
+# libvirt 그룹이 없다면:
+ssh user@host "sudo usermod -aG libvirt $USER"
+```
