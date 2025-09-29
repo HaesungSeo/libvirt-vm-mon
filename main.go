@@ -2,17 +2,39 @@ package main
 
 import (
 	"encoding/xml"
+	"flag"
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"strings"
 
 	libvirt "github.com/libvirt/libvirt-go"
 )
 
 func main() {
+	// 명령줄 인수 정의
+	var (
+		user = flag.String("user", "", "SSH 사용자명 (필수)")
+		host = flag.String("host", "", "원격 호스트 IP 또는 호스트명 (필수)")
+	)
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "사용법: %s -user <사용자명> -host <호스트>\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "옵션:\n")
+		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "\n예시: %s -user suser -host 192.168.6.66\n", os.Args[0])
+	}
+	flag.Parse()
+
+	// 필수 매개변수 검증
+	if *user == "" || *host == "" {
+		fmt.Fprintf(os.Stderr, "오류: user와 host 매개변수가 모두 필요합니다.\n\n")
+		flag.Usage()
+		os.Exit(1)
+	}
+
 	// 1) RO로 원격 접속 (socket 경로를 /run, /var/run 둘 다 시도)
-	base := "qemu+ssh://suser@192.168.6.66/system"
+	base := fmt.Sprintf("qemu+ssh://%s@%s/system", *user, *host)
 	var conn *libvirt.Connect
 	var err error
 	for _, sock := range []string{"/run/libvirt/libvirt-sock-ro", "/var/run/libvirt/libvirt-sock-ro"} {
