@@ -15,7 +15,7 @@ libvirt를 통해 원격 서버의 가상머신 상태와 리소스 사용량을
 
 #### Git을 사용하여 클론:
 ```bash
-git clone git@github.com:HaesungSeo/libvirt-vm-mon.git
+git clone https://github.com/HaesungSeo/libvirt-vm-mon.git
 cd libvirt-vm-mon
 ```
 

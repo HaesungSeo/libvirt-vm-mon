@@ -36,6 +36,8 @@ Thumbs.db
 # Project specific binaries
 libvirt-vm-mon
 /libvirt-vm-mon
+lvmon
+/lvmon
 
 # Log files
 *.log
